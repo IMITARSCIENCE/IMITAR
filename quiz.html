@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  /* 배경 이미지 및 전체 레이아웃 */
   body {
       font-family: Arial, sans-serif;
       display: flex;
@@ -23,21 +22,18 @@
       text-align: center;
   }
 
-  /* 문제 제목 */
-  h1 {
-      font-size: 36px;
-      margin-bottom: 20px;
-      text-shadow: 2px 2px 5px #000000;
-  }
+  .screen { display: none; flex-direction: column; align-items: center; }
+  .active { display: flex; }
 
-  /* 문제 텍스트 */
-  p#question {
-      font-size: 28px;
-      margin-bottom: 30px;
-      text-shadow: 1px 1px 3px #000000;
-  }
+  h1 { font-size: 36px; margin-bottom: 20px; text-shadow: 2px 2px 5px #000000; }
+  p { font-size: 28px; margin-bottom: 30px; text-shadow: 1px 1px 3px #000000; }
+  p, h1 {
+    max-width: 90%;           /* 화면 가로의 90%까지만 사용 */
+    word-wrap: break-word;    /* 긴 단어 자동 줄바꿈 */
+    overflow-wrap: break-word;/* 최신 표준 */
+}
 
-  /* 버튼 스타일 */
+
   button {
       background-color: rgba(255, 255, 255, 0.8);
       border: none;
@@ -54,57 +50,90 @@
       background-color: rgba(255, 255, 255, 1);
   }
 
-  /* 모바일 화면 버튼 크기 조정 */
   @media (max-width: 600px) {
-      button {
-          padding: 12px 25px;
-          font-size: 20px;
-      }
-      h1 {
-          font-size: 28px;
-      }
-      p#question {
-          font-size: 22px;
-      }
+      button { padding: 12px 25px; font-size: 20px; }
+      h1 { font-size: 28px; }
+      p { font-size: 22px; }
   }
 </style>
 </head>
 
 <body>
-<h1>OX 퀴즈</h1>
-<p id="question">퀴즈1</p>
 
-<!-- OX 버튼 -->
-<button onclick="checkAnswer('O')">O</button>
-<button onclick="checkAnswer('X')">X</button>
+<!-- 퀴즈 화면 -->
+<div id="quizScreen" class="screen active">
+  <h1>OX 퀴즈</h1>
+  <p id="question">퀴즈1</p>
+  <button id="oBtn">O</button>
+  <button id="xBtn">X</button>
+</div>
+
+<!-- 해설 화면 -->
+<div id="explanationScreen" class="screen">
+  <h1>해설</h1>
+  <p id="explanationText">해설1</p>
+  <button id="nextBtn">다음</button>
+</div>
 
 <script>
-  // 문제 및 정답 배열
   const quizList = [
-      {question: "퀴즈1", answer: "O"},
-      {question: "퀴즈2", answer: "X"},
-      {question: "퀴즈3", answer: "O"}
+      {question: "장기칩 기술은 동물 실험을 대체할 수 없다", answer: "X", explanation: "장기칩은 사람의 세포를 활용한 미세유체 기반 3D 배양 시스템입니다.<br>실제 인간 장기의 구조와 환경을 모사하여 특정 약물, 화학물질, 독성 실험에서 인간 반응을 직접 관찰이 가능합니다.<br>즉, 동물 실험보다 인간 생리 반응에 더욱 가까운 데이터를 얻을 수 있습니다."},
+      {question: "퀴즈2", answer: "X", explanation: "해설2"},
+      {question: "퀴즈3", answer: "O", explanation: "해설3"}
   ];
 
-  let current = 0; // 현재 문제 인덱스
+  let current = 0;
 
-  function checkAnswer(userAnswer) {
-      let correctAnswer = quizList[current].answer;
-      if(userAnswer === correctAnswer){
-          alert("정답!");
+  const quizScreen = document.getElementById("quizScreen");
+  const explanationScreen = document.getElementById("explanationScreen");
+  const questionEl = document.getElementById("question");
+  const explanationText = document.getElementById("explanationText");
+  const nextBtn = document.getElementById("nextBtn");
+
+  function showQuiz() {
+      quizScreen.classList.add("active");
+      explanationScreen.classList.remove("active");
+      questionEl.textContent = quizList[current].question;
+  }
+
+  function showExplanation() {
+      quizScreen.classList.remove("active");
+      explanationScreen.classList.add("active");
+      explanationText.innerHTML = quizList[current].explanation;
+
+      // 마지막 문제일 때 버튼 텍스트 변경
+      if(current === quizList.length - 1){
+          nextBtn.textContent = "자세히 알아보기";
       } else {
-          alert("틀렸습니다!");
-      }
-
-      current++; // 다음 문제로 이동
-
-      if(current < quizList.length){
-          document.getElementById("question").textContent = quizList[current].question;
-      } else {
-          // 모든 문제 완료 후 홈페이지 이동
-          window.location.href = "https://imitarscience.com/";
+          nextBtn.textContent = "다음";
       }
   }
+
+  function checkAnswer(userAnswer) {
+      const correctAnswer = quizList[current].answer;
+      if(userAnswer === correctAnswer){
+          alert("정답입니다!!!");
+      } else {
+          alert("오답입니다.");
+      }
+      showExplanation();
+  }
+
+  document.getElementById("oBtn").addEventListener("click", () => checkAnswer("O"));
+  document.getElementById("xBtn").addEventListener("click", () => checkAnswer("X"));
+
+  nextBtn.addEventListener("click", () => {
+      current++;
+      if(current < quizList.length){
+          showQuiz();
+      } else {
+          // 마지막 문제 해설 후 홈페이지 이동
+          window.location.href = "https://imitarscience.com/";
+      }
+  });
+
+  showQuiz();
 </script>
+
 </body>
 </html>
